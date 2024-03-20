@@ -5,7 +5,7 @@
         private readonly int rows = 10;
         private readonly int columns = 10;
 
-        public Player Player { get; } = player;
+        public Player Player { get; }
         public Peg[,] Pegs { get; }
 
         public TargetGrid(Player player)
@@ -14,11 +14,29 @@
             Pegs = GenerateInitialPegs();
         }
 
+        public bool IsEmpty(int row, int col)
+        {
+            return IsEmpty(new Position(row, col));
+        }
+        public bool IsEmpty(Position pos)
+        {
+            return this[pos] == Peg.None;
+        }
+        public bool SetPeg(Position pos, Peg peg)
+        {
+            if (Position.IsValidPosition(pos) && IsEmpty(pos))
+            {
+                this[pos] = peg;
+                return true;
+            }
+            return false;
+        }
+
         public Peg this[int row, int column]
         {
             get
             {
-                this[new Position(row, column)];
+                return this[new Position(row, column)];
             }
             set
             {
@@ -32,11 +50,11 @@
             {
                 if (Position.IsValidPosition(pos))
                 {
-                    return Pegs[pos.row, pos.column];
+                    return Pegs[pos.Row, pos.Column];
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException("position", "invalid position");
+                    throw new ArgumentOutOfRangeException(nameof(pos), "Invalid position");
                 }
             }
             set
@@ -47,24 +65,22 @@
                 }
                 else if (Position.IsValidPosition(pos))
                 {
-                    throw new argumentOutOfRangeException("position", "invalid position");
-                }
-                else
-                {
-                    throw new argument
+                    throw new ArgumentOutOfRangeException(nameof(pos), "Invalid position");
                 }
             }
         }
 
         private Peg[,] GenerateInitialPegs()
         {
+            Peg[,] result = new Peg[rows, columns];
             for (int r = 0; r < rows; r++)
             {
                 for (int c = 0; c < columns; c++)
                 {
-                    Pegs[r, c] = Peg.None;
+                    result[r, c] = Peg.None;
                 }
             }
+            return result;
         }
         
     }
