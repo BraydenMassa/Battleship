@@ -1,32 +1,51 @@
-﻿namespace BattleshipLogic
+﻿
+namespace BattleshipLogic
 {
     public class Position(int row, int column)
     {
         public int Row { get; set; } = row;
         public int Column { get; set; } = column;
+        public Peg Peg { get; private set; } = Peg.None;
 
-        public static Position[] operator +(Position[] basePositions, Position offset)
+        public static Position operator +(Position pos, Direction dir)
         {
-            return basePositions.Select(p => new Position(p.Row + offset.Row, p.Column + offset.Column)).ToArray();
-        }
-
-        public static Position operator *(Position basePosition, int offset) 
-        { 
-            return new Position(basePosition.Row * offset, basePosition.Column * offset);
+            return new Position(pos.Row + dir.RowDelta, pos.Column + dir.ColumnDelta);
         }
 
-        public static bool IsValidPosition(Position position)
+        
+
+        public static bool IsValid(Position pos)
         {
-            return IsValidRow(position) && IsValidColumn(position);
+            return IsValidRow(pos) && IsValidColumn(pos);
         }
-        public static bool IsValidRow(Position position)
+        
+        private static bool IsValidRow(Position pos)
         {
-            return position.Row >= 0 && position.Row < 10;
+            return pos.Row >= 0 && pos.Row < 10;
         }
-        public static bool IsValidColumn(Position position)
+        private static bool IsValidColumn(Position pos)
         {
-            return position.Column >= 0 && position.Column < 10;
+            return pos.Column >= 0 && pos.Column < 10;
         }
 
+        public override bool Equals(object? obj)
+        {
+            return obj is Position position &&
+                   Row == position.Row &&
+                   Column == position.Column &&
+                   Peg == position.Peg;
+        }
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Row, Column, Peg);
+        }
+        public static bool operator ==(Position? left, Position? right)
+        {
+            return EqualityComparer<Position>.Default.Equals(left, right);
+        }
+        public static bool operator !=(Position? left, Position? right)
+        {
+            return !(left == right);
+        }
     }
 }

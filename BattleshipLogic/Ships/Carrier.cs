@@ -1,20 +1,9 @@
 ﻿namespace BattleshipLogic
 {
-    public class Carrier : Ship
+    public class Carrier(Tile source, Direction dir) : Ship(source, dir)
     {
-        private readonly Position[][] tiles = new Position[][]
-        {
-
-        };
-        public override Position[][] Tiles { get; }
         public override ShipType Type => ShipType.Carrier;
-        public override bool IsCaptured => false;
 
-        public Carrier() 
-        {
-            
-        }
-
-
+        public override int Length => 5;
     }
 }

@@ -1,134 +1,69 @@
-﻿using System.Data;
-
-namespace BattleshipLogic
+﻿namespace BattleshipLogic
 {
     public abstract class Ship
     {
         public abstract ShipType Type { get; }
-        public abstract int NumHoles { get; }
-        private readonly Position[][] tiles;
-        private int rotationState;
-        private Position offset;
+        public abstract int Length { get; }
+        public IEnumerable<Tile> Tiles { get; }
+        public bool IsCaptured { get; private set; }
 
-        public Ship()
+        public Ship(Tile source, Direction dir)
         {
-            offset = new Position(0, 0);
-            rotationState = 0;
-            tiles = BuildTiles();
+            Tiles = BuildInitialTiles(source, dir);
+            IsCaptured = false;
         }
 
-        public Position[] CurrentPositions()
+        public override string ToString()
         {
-            return tiles[rotationState] + offset;
-        }
-        public void Rotate()
-        {
-            rotationState = rotationState == 0 ? 1 : 0;
-        }
-
-        public void Move(Position offset)
-        {
-            Move(offset.Row, offset.Column);
-        }
-
-        public void Move(int rows, int columns)
-        {
-            offset.Row += rows;
-            offset.Column += columns;
-            SnapToGrid();
-        }
-
-        public void MoveRight(int spaces)
-        {
-            Move(0, 1 * spaces);
-        }
-        public void MoveLeft(int spaces)
-        {
-            Move(0, -1 * spaces);
-        }
-        public void MoveUp(int spaces)
-        {
-            Move(-1 * spaces, 0);
-        }
-        public void MoveDown(int spaces)
-        {
-            Move(1 * spaces, 0);
-        }
-
-        private void SnapToGrid()
-        {
-            if (!HasInvalidPosition())
+            string result = Type.ShipTypeString() + "\n";
+            foreach (Tile tile in Tiles)
             {
-                return;
+                result += tile + "\n";
             }
-            int spaces = 0;
-            foreach (Position p in CurrentPositions())
+            return result;
+        }
+
+
+        public void Hit(Position pos)
+        {
+            foreach (Tile tile in Tiles)
             {
-                if (!Position.IsValidPosition(p))
+                if (tile.Position == pos && !tile.HasPeg())
                 {
-                    spaces++;
+                    tile.Hit();
+                    CheckForCapture();
                 }
             }
-            Position direction = GetInvalidDirection();
-            Move(direction * spaces);
         }
-
-        private Position GetInvalidDirection()
+        public bool OccupiesTile(Position pos)
         {
-            Position first = tiles[rotationState][0];
-            Position last = tiles[rotationState][tiles.Length - 1];
-            if (!Position.IsValidPosition(first))
+            foreach (Tile tile in Tiles)
             {
-                return !Position.IsValidRow(first) ? 
-            }
-        }
-
-
-        private Position GetInvalidRowDirection()
-        {
-            if (tiles[rotationState][tiles[1].Length].Row >= 10)
-            {
-
-            }
-        }
-
-        private bool HasInvalidPosition()
-        {
-            return HasInvalidRow() || HasInvalidColumn();
-        }
-
-        private bool HasInvalidRow()
-        {
-            foreach (Position p in CurrentPositions())
-            {
-                if (!Position.IsValidRow(p))
+                if (pos == tile.Position)
                 {
                     return true;
                 }
             }
             return false;
         }
-        private bool HasInvalidColumn()
+        private IEnumerable<Tile> BuildInitialTiles(Tile source, Direction dir)
         {
-            foreach (Position p in CurrentPositions())
+            for (int i = 0; i < Length; i++)
             {
-                if (!Position.IsValidColumn(p))
+                yield return new Tile(source.Position + (dir * i));
+            }
+        }
+        private void CheckForCapture()
+        {
+            int hits = 0;
+            foreach (Tile tile in Tiles)
+            {
+                if (tile.IsHit())
                 {
-                    return true;
+                    hits++;
                 }
             }
-            return false;
-        }
-
-        private Position[][] BuildTiles()
-        {
-            Position[][] positions = [];
-            for (int i = 0; i < NumHoles; i++)
-            {
-                positions[0][i] = new Position(0, i);
-                positions[1][i] = new Position(i, 0);
-            }
-            return positions;
+            IsCaptured = hits == Length;
         }
     }
 }

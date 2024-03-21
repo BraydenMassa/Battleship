@@ -1,15 +1,15 @@
 ﻿namespace BattleshipLogic
 {
-    public enum Player
+    public class Player(PlayerID playerID, IEnumerable<Ship> ships)
     {
-        One, Two
-    }
+        public PlayerID PlayerID { get; } = playerID;
+        public TargetGrid TargetGrid { get; } = new TargetGrid();
+        public OceanGrid OceanGrid { get; } = new OceanGrid(ships);
 
-    public static class PlayerExtensions
-    {
-        public static Player Opponent(this Player player )
+        public override string ToString()
         {
-            return player == Player.One ? Player.Two : Player.One;
+            return PlayerID.PlayerIDString() + "\n" + OceanGrid;
         }
+
     }
 }
